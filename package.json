@@ -1,0 +1,39 @@
+{
+  "name": "fullres-nextjs",
+  "version": "1.0.0",
+  "description": "A Next.js package for fullres.com analytics",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"lint": "eslint ."
+  },
+  "keywords": [
+  	"nextjs",
+    "next",
+    "fullres",
+    "analytics",
+    "website-analytics",
+    "tracking",
+    "user-analytics",
+    "pageviews",
+    "event-tracking",
+    "react",
+    "javascript",
+    "web-performance",
+    "SEO",
+    "data-analytics"
+  ],
+  "author": "Todd Garland <todd@fullres.com>",
+  "license": "MIT",
+  "repository": {
+	"type": "git",
+	"url": "https://github.com/fullreshq/fullres-nextjs.git"
+  },
+  "homepage": "https://fullres.com",
+  "bugs": {
+    "url": "https://github.com/fullreshq/fullres-nextjs/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
