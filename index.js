@@ -1,17 +1,53 @@
 const React = require('react');
 const Script = require('next/script').default;
-const { initFullRes, trackEvent, addMetadata } = require('./fullres');
+const { events, metadata } = require('./fullres');
 
-const FullRes = function({ siteKey }) {
-  React.useEffect(function() {
-    initFullRes();
-  }, []);
+if (typeof window !== 'undefined') {
+  if (!window.fullres) {
+    window.fullres = { events: [], metadata: {} };
+  }
+}
 
+const FullresTag = function({ siteKey, proxy }) {
+  const proxyUrl = proxy || '//t.fullres.net';
+  
   return React.createElement(Script, {
     id: 'fullres-analytics',
     strategy: 'afterInteractive',
-    src: `https://t.fullres.net/${siteKey}.js?${new Date().getTime() - new Date().getTime() % 43200000}`
+    src: `${proxyUrl}/${siteKey}.js?${new Date().getTime() - new Date().getTime() % 43200000}`,
+    onLoad: () => {
+      (function(history) {
+        if (!history || history === undefined) {
+          return;
+        }
+
+        const originalPushState = history.pushState;
+        let routeChangeInProgress = false;
+		
+        history.pushState = function(...args) {
+          if (routeChangeInProgress) return;
+          routeChangeInProgress = true;
+
+          const onRouteChangeComplete = () => {
+			
+            originalPushState.apply(history, args);
+			
+            window.removeEventListener('routeChangeComplete', onRouteChangeComplete);
+            routeChangeInProgress = false;
+          };
+		  
+          window.addEventListener('routeChangeComplete', onRouteChangeComplete, { once: true });
+		  
+          setTimeout(() => {
+            if (routeChangeInProgress) {
+              onRouteChangeComplete();
+            }
+          }, 100);
+        };
+
+      })(window.history);
+    }
   });
 };
 
-module.exports = { FullRes, trackEvent, addMetadata };
+module.exports = { FullresTag, fullres: { events, metadata } };

@@ -1,24 +1,24 @@
-const initFullRes = function() {
-  if (!window.fullresInitialized) {
-    window.fullres = window.fullres || { events: [], metadata: {} };
-    window.fullresInitialized = true;
+const events = {
+  push(data) {
+    if (typeof window === 'undefined') {
+      console.error('Cannot track events server side!');
+      return;
+    }
+    window.fullres.events.push(data);
   }
 };
 
-const trackEvent = function(eventKey, eventData) {
-  if (window.fullres && typeof window.fullres.metadata === 'object') {
-    window.fullres.events.push({ key: eventKey, ...eventData });
-  } else {
-    console.error('FullRes is not initialized properly.');
+const metadataHandler = {
+  set: function(target, key, value) {
+    if (typeof window === 'undefined') {
+      console.error('Cannot set metadata server side!');
+      return true;
+    }
+    window.fullres.metadata[key] = value;
+    return true;
   }
 };
 
-const addMetadata = function(metadata) {
-  if (window.fullres && typeof window.fullres.metadata === 'object') {
-    window.fullres.metadata = { ...window.fullres.metadata, ...metadata };
-  } else {
-    console.error('FullRes is not initialized properly.');
-  }
-};
+const metadata = new Proxy({}, metadataHandler);
 
-module.exports = { initFullRes, trackEvent, addMetadata };
+module.exports = { events, metadata };
