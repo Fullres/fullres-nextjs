@@ -8,46 +8,27 @@ if (typeof window !== 'undefined') {
   }
 }
 
-const FullresTag = function({ siteKey, proxy }) {
+const FullresProvider = ({ siteKey, proxy, children }) => {     
+  const router = require('next/router').useRouter();                      
   const proxyUrl = proxy || '//t.fullres.net';
   
-  return React.createElement(Script, {
-    id: 'fullres-analytics',
-    strategy: 'afterInteractive',
-    src: `${proxyUrl}/${siteKey}.js?${new Date().getTime() - new Date().getTime() % 43200000}`,
-    onLoad: () => {
-      (function(history) {
-        if (!history || history === undefined) {
-          return;
-        }
+  React.useEffect(() => {                                   
+    const script = document.createElement('script');
+    script.id = 'fullres-analytics';
+    script.src = `${proxyUrl}/${siteKey}.js?${new Date().getTime() - new Date().getTime() % 43200000}`;
+    script.async = true;
+    document.body.appendChild(script);
 
-        const originalPushState = history.pushState;
-        let routeChangeInProgress = false;
-		
-        history.pushState = function(...args) {
-          if (routeChangeInProgress) return;
-          routeChangeInProgress = true;
-
-          const onRouteChangeComplete = () => {
-			
-            originalPushState.apply(history, args);
-			
-            window.removeEventListener('routeChangeComplete', onRouteChangeComplete);
-            routeChangeInProgress = false;
-          };
-		  
-          window.addEventListener('routeChangeComplete', onRouteChangeComplete, { once: true });
-		  
-          setTimeout(() => {
-            if (routeChangeInProgress) {
-              onRouteChangeComplete();
-            }
-          }, 100);
-        };
-
-      })(window.history);
-    }
-  });
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+  
+  React.useEffect(() => {                                         
+    window.dispatchEvent(new Event('fullrespageload'));     
+  }, [router]);                                          
+                                                            
+  return children;                                          
 };
 
-module.exports = { FullresTag, fullres: { events, metadata } };
+module.exports = { FullresProvider, fullres: { events, metadata } };
